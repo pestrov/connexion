@@ -20,13 +20,15 @@ class Resolution(object):
 
 
 class Resolver(object):
-    def __init__(self, function_resolver=utils.get_function_from_name):
+    def __init__(self, default_module_name=None,
+                 function_resolver=utils.get_function_from_name):
         """
         Standard resolver
 
         :param function_resolver: Function that resolves functions using an operationId
         :type function_resolver: types.FunctionType
         """
+        self.default_module_name = default_module_name
         self.function_resolver = function_resolver
 
     def resolve(self, operation):
@@ -49,7 +51,10 @@ class Resolver(object):
         x_router_controller = spec.get('x-swagger-router-controller')
         if x_router_controller is None:
             return operation_id
-        return '{}.{}'.format(x_router_controller, operation_id)
+        if self.default_module_name is None:
+            return '{}.{}'.format(x_router_controller, operation_id)
+        return '{}.{}.{}'.format(self.default_module_name, x_router_controller,
+                                 operation_id)
 
     def resolve_function_from_operation_id(self, operation_id):
         """
